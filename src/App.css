@@ -1,0 +1,39 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: black;
+  overflow: block;
+  color: white;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.gameover {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 99;
+}
+
+.controls {
+  padding: 1em 2em;
+  display: grid;
+  grid-auto-flow: column;
+  gap: .5em;
+}
