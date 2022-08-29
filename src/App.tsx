@@ -5,7 +5,6 @@ import create from 'zustand';
 import './App.css'
 import CameraDolly, { initialCameraPosition } from './CameraDolly';
 import { nanoid } from 'nanoid';
-import { OrthographicCamera, OrbitControls } from '@react-three/drei';
 
 export const LAYER_HEIGHT = .5;
 const INIT_LAYER_SIDE = .5;
@@ -146,6 +145,7 @@ function App() {
         {
           layers.map((layer) => layer)
         }
+        <CameraDolly />
       </Canvas>
     </>
   )

@@ -32,8 +32,11 @@ body {
 }
 
 .controls {
+  position: absolute;
+  width: 100%;
   padding: 1em 2em;
   display: grid;
   grid-auto-flow: column;
   gap: .5em;
+  z-index: 99;
 }
