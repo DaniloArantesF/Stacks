@@ -1,32 +1,33 @@
-import * as THREE from 'three'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { useEffect, useMemo, useRef } from 'react'
-import create from 'zustand'
-import { devtools } from 'zustand/middleware'
-import './App.css'
-import CameraDolly from './CameraDolly'
-import { nanoid } from 'nanoid'
+import * as THREE from 'three';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import create from 'zustand';
+import { devtools } from 'zustand/middleware';
+import './App.css';
+import CameraDolly from './CameraDolly';
+import { nanoid } from 'nanoid';
 
 /** Constants */
-export const LAYER_HEIGHT = 0.5
-const INIT_LAYER_SIDE = 0.5
-const INIT_POSITION_X = { x: -2.5, z: 0 }
-const INIT_POSITION_Z = { x: 0, z: -2.5 }
-const SPEED = 0.01
-const WIREFRAME = false
-export const Y_OFFSET = INIT_LAYER_SIDE / 2
+export const LAYER_HEIGHT = 0.5;
+const INIT_LAYER_SIDE = 0.5;
+const INIT_POSITION_X = { x: -2.5, z: 0 };
+const INIT_POSITION_Z = { x: 0, z: -2.5 };
+const SPEED = 0.01;
+const WIREFRAME = false;
+const GRID = false;
+export const Y_OFFSET = INIT_LAYER_SIDE / 2;
 
 /** Types */
 interface StackState {
-  layers: any[]
-  addLayer: (x: number, z: number, width: number, depth: number) => void
-  nextDirection: 'x' | 'z' // 0 -> move along x axis, 1 -> move along z axis
-  status: GameStatus
-  setStatus: (status: GameStatus) => void
-  reset: () => void
+  layers: any[];
+  addLayer: (x: number, z: number, width: number, depth: number) => void;
+  nextDirection: 'x' | 'z'; // 0 -> move along x axis, 1 -> move along z axis
+  status: GameStatus;
+  setStatus: (status: GameStatus) => void;
+  reset: () => void;
 }
 
-type GameStatus = 'READY' | 'RUNNING' | 'OVER'
+type GameStatus = 'READY' | 'RUNNING' | 'OVER';
 
 /** Game State */
 const initialState: Pick<StackState, 'status' | 'layers' | 'nextDirection'> = {
@@ -42,7 +43,7 @@ const initialState: Pick<StackState, 'status' | 'layers' | 'nextDirection'> = {
     />,
   ],
   nextDirection: 'x',
-}
+};
 
 export const useStackStore = create<StackState>()(
   devtools((set) => ({
@@ -51,7 +52,7 @@ export const useStackStore = create<StackState>()(
     addLayer: (x, z, width, depth) =>
       set((state) => {
         // Determine y position for new layer
-        const y = LAYER_HEIGHT * state.layers.length + Y_OFFSET
+        const y = LAYER_HEIGHT * state.layers.length + Y_OFFSET;
         return {
           layers: [
             ...state.layers,
@@ -67,35 +68,39 @@ export const useStackStore = create<StackState>()(
           ],
           nextDirection: state.nextDirection === 'x' ? 'z' : 'x',
           status: 'RUNNING',
-        }
+        };
       }),
     reset: () => set(() => ({ ...initialState })),
-  }))
-)
+  })),
+);
 
 interface LayerProps {
-  x: number
-  y: number
-  z: number
-  direction?: 'x' | 'z'
-  width: number
-  depth: number
+  x: number;
+  y: number;
+  z: number;
+  direction?: 'x' | 'z';
+  width: number;
+  depth: number;
 }
 
 function Layer({ x, y, z, width, depth, direction }: LayerProps) {
-  const ref = useRef<THREE.Mesh>(null)
-  const { layers, status, setStatus } = useStackStore()
-  const layerIndex = (y - Y_OFFSET) / LAYER_HEIGHT
-  const isLayerActive = useRef(true)
+  const ref = useRef<THREE.Mesh>(null);
+  const { layers, status, setStatus } = useStackStore();
+  const layerIndex = (y - Y_OFFSET) / LAYER_HEIGHT;
+  const isLayerActive = useRef(true);
   const activeMaterial = useMemo(
     () =>
       new THREE.MeshLambertMaterial({ wireframe: WIREFRAME, color: 'green' }),
-    []
-  )
+    [],
+  );
   const inactiveMaterial = useMemo(
-    () => new THREE.MeshLambertMaterial({ wireframe: WIREFRAME, color: 'red' }),
-    []
-  )
+    () =>
+      new THREE.MeshLambertMaterial({
+        wireframe: WIREFRAME,
+        color: `hsl(${250 + layers.length * 4}, 100%, 50%)`,
+      }),
+    [],
+  );
 
   // Run every time the stack changes
   // Assign materials
@@ -105,64 +110,64 @@ function Layer({ x, y, z, width, depth, direction }: LayerProps) {
       !isLayerActive.current ||
       layers.length - layerIndex > 2
     ) {
-      return
+      return;
     }
-    isLayerActive.current = layerIndex > 0 && layers.length - 1 === layerIndex
+    isLayerActive.current = layerIndex > 0 && layers.length - 1 === layerIndex;
 
     // dont set first layer as active
     if (isLayerActive.current) {
-      ref.current.material = activeMaterial
+      ref.current.material = activeMaterial;
     } else {
-      ref.current.material = inactiveMaterial
+      ref.current.material = inactiveMaterial;
     }
-  }, [layers])
+  }, [layers]);
 
   useFrame((state) => {
-    if (!ref.current || !isLayerActive.current || status === 'OVER') return
+    if (!ref.current || !isLayerActive.current || status === 'OVER') return;
 
     // Move layer along x or z axis
     // Set game over if coords go over limit
-    const position = ref.current.position
-    const positionAxis = position[direction as keyof typeof position]
+    const position = ref.current.position;
+    const positionAxis = position[direction as keyof typeof position];
 
     // Move blocks over axis until limit
     if (positionAxis < 5) {
       position.setComponent(
         direction === 'x' ? 0 : 2,
-        (positionAxis as number) + SPEED
-      )
+        (positionAxis as number) + SPEED,
+      );
     } else {
       // update status only once
       if (status === 'RUNNING') {
-        setStatus('OVER')
+        setStatus('OVER');
       }
     }
-  })
+  });
 
   // Set first layer as inactive
   // maybe move this to the prep layer function
   useEffect(() => {
     if (ref.current && layerIndex === 0) {
-      ref.current.material = inactiveMaterial
-      isLayerActive.current = false
+      ref.current.material = inactiveMaterial;
+      isLayerActive.current = false;
     }
-  }, [])
+  }, []);
 
   return (
     <mesh ref={ref} position={[x, y, z]}>
       <boxGeometry args={[width, LAYER_HEIGHT, depth]} />
     </mesh>
-  )
+  );
 }
 
 function App() {
   const { reset, status, setStatus, layers, addLayer, nextDirection } =
-    useStackStore()
-  const groupRef = useRef<THREE.Group>(null)
+    useStackStore();
+  const groupRef = useRef<THREE.Group>(null);
 
-  const aspect = useMemo(() => window.innerWidth / window.innerHeight, [])
-  const width = useMemo(() => 10, [])
-  const height = useMemo(() => width / aspect, [])
+  const aspect = useMemo(() => window.innerWidth / window.innerHeight, []);
+  const width = useMemo(() => 10, []);
+  const height = useMemo(() => width / aspect, []);
   const cameraProps = useMemo(
     () => ({
       position: new THREE.Vector3(5, 2.5, 5),
@@ -171,91 +176,122 @@ function App() {
       top: height / 2,
       bottom: height / -2,
     }),
-    []
-  )
+    [],
+  );
 
-  const prepNewLayer = () => {
-    if (!groupRef.current || status === 'OVER') return
-    if (status === 'READY') {
-      // First layer
-      const width = INIT_LAYER_SIDE
-      const depth = INIT_LAYER_SIDE
-      let x = 0,
-        z = 0
-      if (nextDirection === 'z') {
-        ;(x = INIT_POSITION_Z.x), (z = INIT_POSITION_Z.z)
-      } else {
-        ;(x = INIT_POSITION_X.x), (z = INIT_POSITION_X.z)
-      }
-      addLayer(x, z, width, depth)
-    } else {
-      // Calculate intersection of current top with last position
-      const topLayer =
-        groupRef.current.children[groupRef.current.children.length - 1]
-      const lastLayer =
-        groupRef.current.children[groupRef.current.children.length - 2]
+  useEffect(() => {
+    // Add keyboard event listeners
+    window.addEventListener('keydown', handleKey);
 
-      const { width: topWidth, depth: topDepth } =
-        layers[layers.length - 1].props
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+    }
+  },[])
 
-      let delta = 0
-      const direction = nextDirection === 'x' ? 'z' : 'x'
-
-      if (direction === 'x') {
-        // top layer is moving along x axis
-        delta = topLayer.position.x - lastLayer.position.x
-      } else {
-        // top layer is moving along z axis
-        delta = topLayer.position.z - lastLayer.position.z
-      }
-
-      const size = direction === 'x' ? topWidth : topDepth
-      const overhangSize = Math.abs(delta)
-      const overlap = size - overhangSize
-
-      // TODO: set threshold to ignore really small gaps
-      if (overlap > 0) {
-        const newWidth = direction === 'x' ? overlap : topWidth
-        const newDepth = direction === 'z' ? overlap : topDepth
-
-        // Update model
-        topLayer.scale.setComponent(direction === 'x' ? 0 : 2, overlap / size)
-        const newPosition =
-          topLayer.position.getComponent(direction === 'x' ? 0 : 2) - delta / 2
-        topLayer.position.setComponent(direction === 'x' ? 0 : 2, newPosition)
-
-        // Justify x or z coords with last layer
-        const newX = direction === 'x' ? topLayer.position.x : INIT_POSITION_X.x
-        const newZ = direction === 'z' ? topLayer.position.z : INIT_POSITION_Z.z
-
-        // Add new layer with newWidth and newDepth
-        addLayer(newX, newZ, newWidth, newDepth)
-      } else {
-        // Game over, objects did not intersect
-        setStatus('OVER')
-      }
+  const handleKey = (e: KeyboardEvent) => {
+    if (e.key === 'r') {
+      reset();
     }
   }
 
+  const prepNewLayer = () => {
+    if (!groupRef.current) return;
+    if (status === 'OVER') return reset();
+    if (status === 'READY') {
+      // First layer
+      const width = INIT_LAYER_SIDE;
+      const depth = INIT_LAYER_SIDE;
+      let x = 0,
+        z = 0;
+      if (nextDirection === 'z') {
+        (x = INIT_POSITION_Z.x), (z = INIT_POSITION_Z.z);
+      } else {
+        (x = INIT_POSITION_X.x), (z = INIT_POSITION_X.z);
+      }
+      addLayer(x, z, width, depth);
+    } else {
+      // Calculate intersection of current top with last position
+      const topLayer =
+        groupRef.current.children[groupRef.current.children.length - 1];
+      const lastLayer =
+        groupRef.current.children[groupRef.current.children.length - 2];
+
+      const { width: topWidth, depth: topDepth } =
+        layers[layers.length - 1].props;
+
+      let delta = 0;
+      const direction = nextDirection === 'x' ? 'z' : 'x';
+
+      if (direction === 'x') {
+        // top layer is moving along x axis
+        delta = topLayer.position.x - lastLayer.position.x;
+      } else {
+        // top layer is moving along z axis
+        delta = topLayer.position.z - lastLayer.position.z;
+      }
+
+      const size = direction === 'x' ? topWidth : topDepth;
+      const overhangSize = Math.abs(delta);
+      const overlap = size - overhangSize;
+
+      // TODO: set threshold to ignore really small gaps
+      if (overlap > 0) {
+        const newWidth = direction === 'x' ? overlap : topWidth;
+        const newDepth = direction === 'z' ? overlap : topDepth;
+
+        // Update model
+        topLayer.scale.setComponent(direction === 'x' ? 0 : 2, overlap / size);
+        const newPosition =
+          topLayer.position.getComponent(direction === 'x' ? 0 : 2) - delta / 2;
+        topLayer.position.setComponent(direction === 'x' ? 0 : 2, newPosition);
+
+        // Justify x or z coords with last layer
+        const newX =
+          direction === 'x' ? topLayer.position.x : INIT_POSITION_X.x;
+        const newZ =
+          direction === 'z' ? topLayer.position.z : INIT_POSITION_Z.z;
+
+        // Add new layer with newWidth and newDepth
+        addLayer(newX, newZ, newWidth, newDepth);
+      } else {
+        // Game over, objects did not intersect
+        setStatus('OVER');
+      }
+    }
+  };
+
   return (
     <>
+      <div className='score'>
+        <h2>{layers.length - 1}</h2>
+      </div>
+      {status === 'READY' && (
+        <div className="welcome">
+          <h1>Welcome!</h1>
+          <p>Click anywhere to start</p>
+          <p>Press R to reset</p>
+        </div>
+      )}
+      {status === 'OVER' && <h1 className="gameover">Game Over</h1>}
       <div className="controls">
-        {status === 'OVER' && <h1 className="gameover">Game Over</h1>}
-        <button onClick={prepNewLayer}>Add Layer</button>
-        <button onClick={reset}>Reset</button>
+        <button onClick={prepNewLayer}>Add Layer (LMB)</button>
+        <button onClick={reset}>Reset (R)</button>
       </div>
       <Canvas
+        shadows
         orthographic
         camera={{ ...cameraProps, near: 0, far: 100, zoom: 500 }}
+        onClick={prepNewLayer}
       >
+        <color attach="background" args={['#069']} />
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 30, 10]} intensity={0.6} />
-        <gridHelper />
+        { GRID && <gridHelper />}
         <group ref={groupRef}>{layers.map((layer) => layer)}</group>
         <CameraDolly />
       </Canvas>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

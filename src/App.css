@@ -23,6 +23,25 @@ body {
   height: 100%;
 }
 
+.score {
+  position: absolute;
+  display: flex;
+  font-size: 2.5em;
+  width: 100vw;
+  margin: 2em auto;
+  justify-content: center;
+  z-index: 99;
+}
+
+.welcome {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -75%);
+  z-index: 99;
+  text-align: center;
+}
+
 .gameover {
   position: absolute;
   left: 50%;
@@ -39,4 +58,6 @@ body {
   grid-auto-flow: column;
   gap: .5em;
   z-index: 99;
+  bottom: 0;
 }
+
