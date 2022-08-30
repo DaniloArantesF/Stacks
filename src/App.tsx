@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { Suspense, useEffect, useMemo, useRef } from 'react';
 import create from 'zustand';
 import { devtools } from 'zustand/middleware';
 import './App.css';
-import CameraDolly from './CameraDolly';
+import CameraDolly, { getCameraZoom } from './CameraDolly';
 import { nanoid } from 'nanoid';
+import { Stats } from '@react-three/drei';
 
 /** Constants */
 export const LAYER_HEIGHT = 0.5;
@@ -154,7 +155,7 @@ function Layer({ x, y, z, width, depth, direction }: LayerProps) {
   }, []);
 
   return (
-    <mesh ref={ref} position={[x, y, z]}>
+    <mesh receiveShadow castShadow ref={ref} position={[x, y, z]}>
       <boxGeometry args={[width, LAYER_HEIGHT, depth]} />
     </mesh>
   );
@@ -180,7 +181,7 @@ function App() {
   );
 
   useEffect(() => {
-    // Add keyboard event listeners
+    // Add keyboard event listener
     window.addEventListener('keydown', handleKey);
 
     return () => {
@@ -280,15 +281,24 @@ function App() {
       <Canvas
         shadows
         orthographic
-        camera={{ ...cameraProps, near: 0, far: 100, zoom: 500 }}
+        dpr={[1, 2]}
+        camera={{
+          ...cameraProps,
+          near: 0,
+          far: 100,
+          zoom: getCameraZoom(window.innerWidth),
+        }}
         onClick={prepNewLayer}
       >
-        <color attach="background" args={['#069']} />
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 30, 10]} intensity={0.6} />
-        {GRID && <gridHelper />}
-        <group ref={groupRef}>{layers.map((layer) => layer)}</group>
-        <CameraDolly />
+        <Suspense fallback={null}>
+          <color attach="background" args={['#069']} />
+          <Stats showPanel={0} className="stats" />
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 30, 10]} intensity={0.6} />
+          {GRID && <gridHelper />}
+          <group ref={groupRef}>{layers.map((layer) => layer)}</group>
+          <CameraDolly />
+        </Suspense>
       </Canvas>
     </>
   );

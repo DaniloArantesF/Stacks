@@ -52,12 +52,31 @@ body {
 
 .controls {
   position: absolute;
-  width: 100%;
-  padding: 1em 2em;
+  width: 100vw;
+  padding: 2em 2em;
   display: grid;
-  grid-auto-flow: column;
-  gap: .5em;
+  grid-template-columns: repeat(auto-fit, minmax(250px, .5fr));
+  gap: 1em;
   z-index: 99;
   bottom: 0;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
 }
 
+.controls button {
+  width: 100%;
+  max-width: 300px;
+  border: none;
+  padding: 1em;
+}
+
+.stats {
+  padding: .5em;
+}
+
+@media only screen and (min-width: 1000px) {
+  .controls button {
+    padding: 2em;
+  }
+}
