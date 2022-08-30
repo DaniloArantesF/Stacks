@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import create from 'zustand';
 import { devtools } from 'zustand/middleware';
 import './App.css';
@@ -19,9 +19,9 @@ export const Y_OFFSET = INIT_LAYER_SIDE / 2;
 
 /** Types */
 interface StackState {
-  layers: any[];
+  layers: JSX.Element[];
   addLayer: (x: number, z: number, width: number, depth: number) => void;
-  nextDirection: 'x' | 'z'; // 0 -> move along x axis, 1 -> move along z axis
+  nextDirection: 'x' | 'z';
   status: GameStatus;
   setStatus: (status: GameStatus) => void;
   reset: () => void;
@@ -48,7 +48,7 @@ const initialState: Pick<StackState, 'status' | 'layers' | 'nextDirection'> = {
 export const useStackStore = create<StackState>()(
   devtools((set) => ({
     ...initialState,
-    setStatus: (status: GameStatus) => set((state) => ({ status })),
+    setStatus: (status: GameStatus) => set(() => ({ status })),
     addLayer: (x, z, width, depth) =>
       set((state) => {
         // Determine y position for new layer
@@ -122,7 +122,7 @@ function Layer({ x, y, z, width, depth, direction }: LayerProps) {
     }
   }, [layers]);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (!ref.current || !isLayerActive.current || status === 'OVER') return;
 
     // Move layer along x or z axis
@@ -185,14 +185,14 @@ function App() {
 
     return () => {
       window.removeEventListener('keydown', handleKey);
-    }
-  },[])
+    };
+  }, []);
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key === 'r') {
       reset();
     }
-  }
+  };
 
   const prepNewLayer = () => {
     if (!groupRef.current) return;
@@ -262,7 +262,7 @@ function App() {
 
   return (
     <>
-      <div className='score'>
+      <div className="score">
         <h2>{layers.length - 1}</h2>
       </div>
       {status === 'READY' && (
@@ -286,7 +286,7 @@ function App() {
         <color attach="background" args={['#069']} />
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 30, 10]} intensity={0.6} />
-        { GRID && <gridHelper />}
+        {GRID && <gridHelper />}
         <group ref={groupRef}>{layers.map((layer) => layer)}</group>
         <CameraDolly />
       </Canvas>

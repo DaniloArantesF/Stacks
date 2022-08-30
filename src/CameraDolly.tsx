@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { LAYER_HEIGHT, useStackStore, Y_OFFSET } from './App';
 
 export const initialCameraPosition = new THREE.Vector3(5, 2.5, 5);
