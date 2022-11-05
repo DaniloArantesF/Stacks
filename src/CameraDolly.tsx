@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LAYER_HEIGHT, useStackStore, Y_OFFSET } from './App';
 
-export const initialCameraPosition = new THREE.Vector3(5, 2.5, 5);
+export const initialCameraPosition = new THREE.Vector3(3, 2.5, 3);
 
 export const getCameraZoom = (windowWidth: number) => {
   // lg=500,md=300,sm=200
@@ -24,7 +24,8 @@ const CameraDolly = () => {
   const { camera } = useThree();
 
   useEffect(() => {
-    camera.lookAt(0, (LAYER_HEIGHT * layers.length + Y_OFFSET) / 2, 0);
+    // camera.lookAt(0, (LAYER_HEIGHT * layers.length + Y_OFFSET) / 2, 0);
+    camera.lookAt(0, -(LAYER_HEIGHT * layers.length + Y_OFFSET), 0);
 
     // Resize event listener
     window.addEventListener('resize', handleResize);
@@ -60,6 +61,8 @@ const CameraDolly = () => {
       );
       newPosition.y += LAYER_HEIGHT * 2;
       camera.position.lerp(newPosition, 0.5);
+      camera.zoom *= 0.99;
+
       moved.current = true;
     }
   });
@@ -67,7 +70,6 @@ const CameraDolly = () => {
   // Adjust zoom if canvas is resized
   useEffect(() => {
     if (camera.zoom !== zoom) {
-      console.log('Adjusting zoom');
       camera.zoom = zoom;
     }
   }, [windowWidth, zoom]);

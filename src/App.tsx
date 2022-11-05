@@ -10,7 +10,7 @@ import { Stats } from '@react-three/drei';
 
 /** Constants */
 export const LAYER_HEIGHT = 0.5;
-const INIT_LAYER_SIDE = 0.5;
+const INIT_LAYER_SIDE = 0.75;
 const INIT_POSITION_X = { x: -2.5, z: 0 };
 const INIT_POSITION_Z = { x: 0, z: -2.5 };
 const SPEED = 0.01;
@@ -98,7 +98,7 @@ function Layer({ x, y, z, width, depth, direction }: LayerProps) {
     () =>
       new THREE.MeshLambertMaterial({
         wireframe: WIREFRAME,
-        color: `hsl(${250 + layers.length * 4}, 100%, 50%)`,
+        color: `hsl(${250 + layers.length * 4}, 90%, 50%)`,
       }),
     [],
   );

@@ -13,7 +13,6 @@
   "dependencies": {
     "@react-three/drei": "^9.24.4",
     "@react-three/fiber": "^8.3.0",
-    "@types/three": "^0.143.0",
     "nanoid": "^4.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -26,6 +25,7 @@
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.1",
     "@vitejs/plugin-react": "^2.0.0",
+    "@types/three": "^0.143.0",
     "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
